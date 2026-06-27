@@ -29,19 +29,18 @@ class ToolOptions(QWidget):
         layout.addWidget(self.color_button)
         layout.addWidget(label)
         layout.addWidget(self.width_spin)
-        self._tool = Tool.PEN
+        self._tool = Tool.RECTANGLE
         self.color_button.clicked.connect(self.choose_color)
         self.width_spin.valueChanged.connect(self._width_changed)
-        self.set_tool(Tool.PEN)
+        self.set_tool(Tool.RECTANGLE)
 
     def set_tool(self, tool: Tool) -> None:
         self._tool = tool
-        highlighter = tool is Tool.HIGHLIGHTER
-        self.width_spin.setValue(self.options.highlighter_width if highlighter else self.options.pen_width)
-        self._update_color_button(self.options.highlighter_color if highlighter else self.options.pen_color)
+        self.width_spin.setValue(self.options.stroke_width)
+        self._update_color_button(self.options.stroke_color)
 
     def _active_color(self) -> QColor:
-        return self.options.highlighter_color if self._tool is Tool.HIGHLIGHTER else self.options.pen_color
+        return self.options.stroke_color
 
     def _update_color_button(self, color: QColor) -> None:
         self.color_button.setStyleSheet(f"background: {color.name()};")
@@ -50,16 +49,10 @@ class ToolOptions(QWidget):
         color = QColorDialog.getColor(self._active_color(), self, "Choose tool color")
         if not color.isValid():
             return
-        if self._tool is Tool.HIGHLIGHTER:
-            self.options.highlighter_color = color
-        else:
-            self.options.pen_color = color
+        self.options.stroke_color = color
         self._update_color_button(color)
         self.options_changed.emit()
 
     def _width_changed(self, width: int) -> None:
-        if self._tool is Tool.HIGHLIGHTER:
-            self.options.highlighter_width = width
-        else:
-            self.options.pen_width = width
+        self.options.stroke_width = width
         self.options_changed.emit()

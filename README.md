@@ -16,6 +16,15 @@ Install the generated package:
 sudo apt install ./dist/opensnip_0.1.0-1_all.deb
 ```
 
+If apt prints a `_apt` permission warning because the package is inside your home directory, install from `/tmp` instead:
+
+```bash
+cp dist/opensnip_0.1.0-1_all.deb /tmp/
+sudo apt install /tmp/opensnip_0.1.0-1_all.deb
+```
+
+That warning is harmless when installation finishes with `Setting up opensnip`.
+
 Run OpenSnip:
 
 ```bash
@@ -33,6 +42,8 @@ sudo apt install ./opensnip_0.1.0-1_all.deb
 ## Ubuntu 24.04 manual setup
 
 ```bash
+git clone https://github.com/Duskwrath/SnippingTools.git
+cd SnippingTools
 sudo apt update
 sudo apt install python3 python3-pip python3-venv gnome-screenshot
 python3 -m venv .venv
@@ -57,7 +68,7 @@ CLI examples:
 
 ```bash
 python main.py --new
-python main.py --fullscreen --delay 5 --copy
+python main.py --fullscreen --copy
 python main.py --fullscreen --output ~/Pictures/capture.png
 opensnip --new
 ```

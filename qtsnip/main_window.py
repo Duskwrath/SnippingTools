@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from PySide6.QtCore import QSize, QTimer, Qt
-from PySide6.QtGui import QAction, QColor, QIcon, QPainter, QPen, QPixmap
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDialogButtonBox,
                                QFileDialog, QFormLayout, QHBoxLayout, QLineEdit,
                                QMainWindow, QMessageBox, QPushButton, QSizePolicy,
@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDialogButtonBox,
 from .capture.base import CaptureError
 from .capture.service import CaptureService
 from .editor_window import EditorWindow
+from .icons import OpenSnipIcons
 from .models import CaptureMode, IMAGE_FILTER, LaunchOptions, Tool
 from .settings import AppSettings
 from .shortcuts import install_shortcuts
@@ -42,13 +43,11 @@ class SettingsDialog(QDialog):
         directory_holder = QWidget(); directory_holder.setLayout(directory_row)
         form.addRow("Default save directory", directory_holder)
         self.format = QComboBox(); self.format.addItems(["png", "jpg", "webp"]); self.format.setCurrentText(settings.image_format)
-        self.delay = QComboBox(); self.delay.addItems(["0", "3", "5", "10"]); self.delay.setCurrentText(str(settings.delay))
-        self.pen_width = QSpinBox(); self.pen_width.setRange(1, 80); self.pen_width.setValue(options.pen_width)
-        self.highlighter_width = QSpinBox(); self.highlighter_width.setRange(1, 80); self.highlighter_width.setValue(options.highlighter_width)
+        self.stroke_width = QSpinBox(); self.stroke_width.setRange(1, 80); self.stroke_width.setValue(options.stroke_width)
         self.auto_copy = QCheckBox(); self.auto_copy.setChecked(settings.auto_copy)
         self.auto_save = QCheckBox(); self.auto_save.setChecked(settings.auto_save)
-        form.addRow("Default format", self.format); form.addRow("Default delay (seconds)", self.delay)
-        form.addRow("Pen width", self.pen_width); form.addRow("Highlighter width", self.highlighter_width)
+        form.addRow("Default format", self.format)
+        form.addRow("Stroke width", self.stroke_width)
         form.addRow("Auto-copy captures", self.auto_copy); form.addRow("Auto-save captures", self.auto_save)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(self.accept); buttons.rejected.connect(self.reject)
@@ -61,9 +60,8 @@ class SettingsDialog(QDialog):
     def apply(self) -> None:
         self.settings.save_directory = Path(self.directory.text()).expanduser()
         self.settings.image_format = self.format.currentText()
-        self.settings.delay = int(self.delay.currentText())
         self.settings.auto_copy = self.auto_copy.isChecked(); self.settings.auto_save = self.auto_save.isChecked()
-        self.options.pen_width = self.pen_width.value(); self.options.highlighter_width = self.highlighter_width.value()
+        self.options.stroke_width = self.stroke_width.value()
         self.settings.save_drawing_options(self.options)
 
 
@@ -108,16 +106,16 @@ class MainWindow(QMainWindow):
 
         new_button = QPushButton("New")
         new_button.setObjectName("primarySnipButton")
-        new_button.setIcon(self._command_icon("selection"))
+        new_button.setIcon(OpenSnipIcons.command("selection"))
         new_button.clicked.connect(self.selection_snip)
 
         open_button = QPushButton("Open")
-        open_button.setIcon(self._command_icon("open"))
+        open_button.setIcon(OpenSnipIcons.command("open"))
         open_button.clicked.connect(self.open_image)
 
         settings_button = QPushButton("Settings")
         settings_button.setToolTip("Settings")
-        settings_button.setIcon(self._command_icon("settings"))
+        settings_button.setIcon(OpenSnipIcons.command("settings"))
         settings_button.clicked.connect(self.show_settings)
 
         title_row = QHBoxLayout()
@@ -132,124 +130,10 @@ class MainWindow(QMainWindow):
         layout.addLayout(title_row)
         return launcher
 
-    def _tool_icon(self, tool: Tool) -> QIcon:
-        pixmap = QPixmap(28, 28)
-        pixmap.fill(Qt.GlobalColor.transparent)
-        painter = QPainter(pixmap)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        ink = QColor("#263340")
-        accent = QColor("#2563eb")
-        painter.setPen(QPen(ink, 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
-
-        if tool is Tool.PEN:
-            painter.drawLine(7, 21, 20, 8)
-            painter.drawLine(18, 6, 22, 10)
-            painter.setPen(QPen(accent, 3, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
-            painter.drawPoint(6, 22)
-        elif tool is Tool.HIGHLIGHTER:
-            painter.setPen(QPen(QColor("#f5c542"), 5, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
-            painter.drawLine(7, 20, 21, 20)
-            painter.setPen(QPen(ink, 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
-            painter.drawLine(9, 16, 19, 6)
-            painter.drawLine(17, 5, 22, 10)
-        elif tool is Tool.ERASER:
-            painter.drawLine(9, 18, 18, 9)
-            painter.drawLine(12, 21, 21, 12)
-            painter.drawLine(9, 18, 12, 21)
-            painter.drawLine(18, 9, 21, 12)
-        elif tool is Tool.RECTANGLE:
-            painter.drawRect(7, 8, 15, 13)
-        elif tool is Tool.CIRCLE:
-            painter.drawEllipse(7, 7, 15, 15)
-        elif tool is Tool.ARROW:
-            painter.drawLine(7, 20, 21, 8)
-            painter.drawLine(21, 8, 20, 15)
-            painter.drawLine(21, 8, 14, 9)
-        elif tool is Tool.TEXT:
-            painter.setPen(QPen(ink, 2))
-            painter.drawLine(8, 8, 20, 8)
-            painter.drawLine(14, 8, 14, 22)
-        elif tool is Tool.CROP:
-            painter.drawLine(9, 5, 9, 20)
-            painter.drawLine(5, 16, 20, 16)
-            painter.drawLine(19, 8, 19, 23)
-            painter.drawLine(8, 21, 23, 21)
-        elif tool is Tool.REDACT:
-            painter.fillRect(7, 9, 15, 11, QColor("#263340"))
-            painter.setPen(QPen(QColor("#ffffff"), 1))
-            painter.drawLine(9, 12, 20, 12)
-            painter.drawLine(9, 16, 20, 16)
-
-        painter.end()
-        return QIcon(pixmap)
-
-    def _command_icon(self, name: str) -> QIcon:
-        pixmap = QPixmap(24, 24)
-        pixmap.fill(Qt.GlobalColor.transparent)
-        painter = QPainter(pixmap)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        ink = QColor("#263340")
-        accent = QColor("#2563eb")
-        painter.setPen(QPen(ink, 1.8, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
-
-        if name == "snip":
-            painter.drawRoundedRect(5, 5, 14, 14, 2, 2)
-            painter.setPen(QPen(accent, 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
-            painter.drawLine(4, 12, 20, 12)
-            painter.drawLine(12, 4, 12, 20)
-        elif name == "selection":
-            painter.setPen(QPen(ink, 1.8, Qt.PenStyle.DashLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
-            painter.drawRoundedRect(5, 5, 12, 12, 2, 2)
-            painter.setPen(QPen(accent, 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
-            painter.drawLine(15, 15, 21, 21)
-            painter.drawLine(21, 21, 18, 21)
-            painter.drawLine(21, 21, 21, 18)
-        elif name == "open":
-            painter.drawRoundedRect(4, 8, 16, 10, 2, 2)
-            painter.drawLine(6, 8, 9, 5)
-            painter.drawLine(9, 5, 13, 5)
-        elif name == "save":
-            painter.drawRoundedRect(5, 4, 14, 16, 2, 2)
-            painter.drawLine(8, 5, 16, 5)
-            painter.drawRect(8, 13, 8, 5)
-            painter.fillRect(9, 6, 5, 4, accent)
-        elif name == "save_as":
-            painter.drawRoundedRect(4, 4, 13, 16, 2, 2)
-            painter.drawLine(7, 5, 14, 5)
-            painter.setPen(QPen(accent, 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
-            painter.drawLine(14, 16, 20, 10)
-            painter.drawLine(18, 10, 20, 10)
-            painter.drawLine(20, 10, 20, 12)
-        elif name == "copy":
-            painter.drawRoundedRect(7, 5, 11, 14, 2, 2)
-            painter.drawRoundedRect(4, 8, 11, 12, 2, 2)
-        elif name == "undo":
-            painter.drawLine(8, 8, 4, 12)
-            painter.drawLine(4, 12, 8, 16)
-            painter.drawLine(5, 12, 18, 12)
-        elif name == "redo":
-            painter.drawLine(16, 8, 20, 12)
-            painter.drawLine(20, 12, 16, 16)
-            painter.drawLine(6, 12, 19, 12)
-        elif name == "delete":
-            painter.drawLine(8, 8, 16, 16)
-            painter.drawLine(16, 8, 8, 16)
-            painter.drawLine(7, 5, 17, 5)
-            painter.drawLine(10, 4, 14, 4)
-        elif name == "settings":
-            painter.drawEllipse(8, 8, 8, 8)
-            painter.drawEllipse(11, 11, 2, 2)
-            painter.drawLine(12, 3, 12, 6)
-            painter.drawLine(12, 18, 12, 21)
-            painter.drawLine(3, 12, 6, 12)
-            painter.drawLine(18, 12, 21, 12)
-            painter.drawLine(6, 6, 8, 8)
-            painter.drawLine(16, 16, 18, 18)
-            painter.drawLine(18, 6, 16, 8)
-            painter.drawLine(8, 16, 6, 18)
-
-        painter.end()
-        return QIcon(pixmap)
+    def _command_action(self, text: str, icon_name: str, callback) -> QAction:
+        action = self._action(text, callback)
+        action.setIcon(OpenSnipIcons.command(icon_name))
+        return action
 
     def _build_toolbar(self) -> None:
         bar = QToolBar("Capture", self)
@@ -260,18 +144,11 @@ class MainWindow(QMainWindow):
         bar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.addToolBar(bar)
 
-        new_action = self._action("New", self.selection_snip)
-        new_action.setIcon(self._command_icon("selection"))
-        open_action = self._action("Open", self.open_image)
-        open_action.setIcon(self._command_icon("open"))
-        save_action = self._action("Save", self.save)
-        save_action.setIcon(self._command_icon("save"))
-        save_as_action = self._action("Save As", self.save_as)
-        save_as_action.setIcon(self._command_icon("save_as"))
-        copy_action = self._action("Copy", self.copy_to_clipboard)
-        copy_action.setIcon(self._command_icon("copy"))
-        settings_action = self._action("Settings", self.show_settings)
-        settings_action.setIcon(self._command_icon("settings"))
+        new_action = self._command_action("New", "selection", self.selection_snip)
+        open_action = self._command_action("Open", "open", self.open_image)
+        copy_action = self._command_action("Copy", "copy", self.copy_to_clipboard)
+        save_action = self._command_action("Save", "save", self.save)
+        settings_action = self._command_action("Settings", "settings", self.show_settings)
 
         bar.addAction(new_action)
         bar.addAction(open_action)
@@ -289,17 +166,14 @@ class MainWindow(QMainWindow):
         self.addToolBar(tools)
         for label, tool in [("Eraser", Tool.ERASER), ("Rectangle", Tool.RECTANGLE), ("Circle", Tool.CIRCLE), ("Arrow", Tool.ARROW), ("Text", Tool.TEXT), ("Crop", Tool.CROP)]:
             action = self._action(label, lambda checked=False, selected=tool: self.select_tool(selected), True)
-            action.setIcon(self._tool_icon(tool))
+            action.setIcon(OpenSnipIcons.tool(tool))
             action.setToolTip(label)
             tools.addAction(action)
         self._actions["Rectangle"].setChecked(True)
         self.editor.canvas.set_tool(Tool.RECTANGLE)
-        undo_action = self._action("Undo", self.undo)
-        undo_action.setIcon(self._command_icon("undo"))
-        redo_action = self._action("Redo", self.redo)
-        redo_action.setIcon(self._command_icon("redo"))
-        delete_action = self._action("Delete", self.delete_selected)
-        delete_action.setIcon(self._command_icon("delete"))
+        undo_action = self._command_action("Undo", "undo", self.undo)
+        redo_action = self._command_action("Redo", "redo", self.redo)
+        delete_action = self._command_action("Delete", "delete", self.delete_selected)
         tools.addAction(undo_action); tools.addAction(redo_action); tools.addAction(delete_action)
         undo_action.setEnabled(False); redo_action.setEnabled(False)
         self.tool_options = ToolOptions(self.options)
@@ -336,9 +210,6 @@ class MainWindow(QMainWindow):
         self.tool_options.set_tool(tool); self.editor.canvas.set_tool(tool)
 
     def _apply_launch_options(self) -> None:
-        if self.launch.delay is not None:
-            seconds = self.launch.delay
-            self.settings.delay = seconds
         if self.launch.fullscreen:
             self._start_capture(CaptureMode.FULLSCREEN)
         elif self.launch.new:

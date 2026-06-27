@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 
 from PySide6.QtCore import QPoint, QPointF, Qt
-from PySide6.QtGui import QColor, QImage, QPainter, QPainterPath, QPen
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
 
 
 def draw_arrow(painter: QPainter, start: QPoint, end: QPoint, color: QColor, width: int) -> None:
@@ -36,17 +36,3 @@ def draw_arrow(painter: QPainter, start: QPoint, end: QPoint, color: QColor, wid
     path.moveTo(end)
     path.lineTo(right)
     painter.drawPath(path)
-
-
-def pixelate(image: QImage, rect) -> None:
-    """Apply deterministic block pixelation without third-party image libraries."""
-    rect = rect.intersected(image.rect())
-    if rect.isEmpty():
-        return
-    block = max(6, min(18, min(rect.width(), rect.height()) // 10 or 6))
-    painter = QPainter(image)
-    for y in range(rect.top(), rect.bottom() + 1, block):
-        for x in range(rect.left(), rect.right() + 1, block):
-            sample = image.pixelColor(x, y)
-            painter.fillRect(x, y, block, block, sample)
-    painter.end()

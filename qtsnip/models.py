@@ -25,30 +25,24 @@ class CaptureMode(str, Enum):
 
 
 class Tool(str, Enum):
-    PEN = "pen"
-    HIGHLIGHTER = "highlighter"
     ERASER = "eraser"
     RECTANGLE = "rectangle"
     CIRCLE = "circle"
     ARROW = "arrow"
     TEXT = "text"
     CROP = "crop"
-    REDACT = "redact"
 
 
 @dataclass
 class DrawingOptions:
-    pen_color: QColor = field(default_factory=lambda: QColor("#e53935"))
-    pen_width: int = 3
-    highlighter_color: QColor = field(default_factory=lambda: QColor("#fff176"))
-    highlighter_width: int = 18
+    stroke_color: QColor = field(default_factory=lambda: QColor("#e53935"))
+    stroke_width: int = 3
 
 
 @dataclass
 class LaunchOptions:
     new: bool = False
     fullscreen: bool = False
-    delay: int | None = None
     output: Path | None = None
     copy: bool = False
 

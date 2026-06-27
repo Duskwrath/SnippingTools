@@ -5,7 +5,7 @@ from pathlib import Path
 from PySide6.QtCore import QSettings
 from PySide6.QtGui import QColor
 
-from .models import CaptureMode, DEFAULT_IMAGE_FORMAT, DrawingOptions
+from .models import DEFAULT_IMAGE_FORMAT, DrawingOptions
 
 
 class AppSettings:
@@ -35,25 +35,6 @@ class AppSettings:
         self._settings.setValue("image_format", value.lower())
 
     @property
-    def capture_mode(self) -> CaptureMode:
-        try:
-            return CaptureMode(str(self.value("capture_mode", CaptureMode.RECTANGLE.value)))
-        except ValueError:
-            return CaptureMode.RECTANGLE
-
-    @capture_mode.setter
-    def capture_mode(self, mode: CaptureMode) -> None:
-        self._settings.setValue("capture_mode", mode.value)
-
-    @property
-    def delay(self) -> int:
-        return int(self.value("delay", 0))
-
-    @delay.setter
-    def delay(self, seconds: int) -> None:
-        self._settings.setValue("delay", seconds)
-
-    @property
     def auto_copy(self) -> bool:
         return str(self.value("auto_copy", False)).lower() in {"true", "1"}
 
@@ -70,15 +51,13 @@ class AppSettings:
         self._settings.setValue("auto_save", enabled)
 
     def drawing_options(self) -> DrawingOptions:
+        color = self.value("stroke_color", self.value("pen_color", "#e53935"))
+        width = self.value("stroke_width", self.value("pen_width", 3))
         return DrawingOptions(
-            QColor(str(self.value("pen_color", "#e53935"))),
-            int(self.value("pen_width", 3)),
-            QColor(str(self.value("highlighter_color", "#fff176"))),
-            int(self.value("highlighter_width", 18)),
+            QColor(str(color)),
+            int(width),
         )
 
     def save_drawing_options(self, options: DrawingOptions) -> None:
-        self._settings.setValue("pen_color", options.pen_color.name())
-        self._settings.setValue("pen_width", options.pen_width)
-        self._settings.setValue("highlighter_color", options.highlighter_color.name())
-        self._settings.setValue("highlighter_width", options.highlighter_width)
+        self._settings.setValue("stroke_color", options.stroke_color.name())
+        self._settings.setValue("stroke_width", options.stroke_width)
