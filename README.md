@@ -4,10 +4,7 @@ OpenSnip is a PySide6/Qt 6 screenshot and image-annotation tool for Ubuntu. It p
 
 ## Download Release
 
-Download the latest Ubuntu `.deb` package from GitHub Releases:
-
-[GitHub Releases Page](https://github.com/Duskwrath/SnippingTools/releases/latest)
-
+Download the latest Ubuntu `.deb` package from [GitHub Releases Page](https://github.com/Duskwrath/SnippingTools/releases/latest):
 
 Install it:
 
