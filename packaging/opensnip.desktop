@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=OpenSnip
+Comment=Selection screenshot and annotation tool
+Exec=opensnip
+Terminal=false
+Categories=Utility;Graphics;
+Keywords=screenshot;snip;capture;annotation;
+Icon=applets-screenshooter
