@@ -2,11 +2,32 @@
 
 OpenSnip is a PySide6/Qt 6 screenshot and image-annotation tool for Ubuntu. It provides selection snips, image opening/saving, clipboard copy, editable annotations, crop, undo/redo, command-line capture options, and persisted user defaults.
 
-## Ubuntu 24.04 install from DEB
+## Download Release
+
+Download the latest Ubuntu `.deb` package from GitHub Releases:
+
+[GitHub Releases Page](https://github.com/Duskwrath/SnippingTools/releases/latest)
+
+
+Install it:
+
+```bash
+sudo dpkg -i opensnip_0.1.0-1_all.deb
+```
+
+Run OpenSnip:
+
+```bash
+opensnip
+```
+
+## Build DEB Locally
 
 Build the Debian package:
 
 ```bash
+git clone https://github.com/Duskwrath/SnippingTools.git
+cd SnippingTools
 sh packaging/build_deb.sh
 ```
 
@@ -32,12 +53,6 @@ opensnip
 ```
 
 The package installs the app to `/opt/opensnip`, adds `/usr/bin/opensnip`, and creates a desktop launcher. On first run, `opensnip` creates a private Python environment in `~/.local/share/opensnip/venv` and installs PySide6 there. This keeps system Python untouched, but the first run needs internet access for `pip`.
-
-To publish a downloadable build, attach `dist/opensnip_0.1.0-1_all.deb` to a GitHub release or provide it from your download page. Users can install it with:
-
-```bash
-sudo apt install ./opensnip_0.1.0-1_all.deb
-```
 
 ## Ubuntu 24.04 manual setup
 
