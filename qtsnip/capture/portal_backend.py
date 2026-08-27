@@ -14,5 +14,5 @@ class PortalBackend(ScreenshotBackend):
     def capture(self, mode: CaptureMode) -> QImage:
         raise CaptureError(
             "The xdg-desktop-portal screenshot backend is not implemented yet. "
-            "Install gnome-screenshot for the GNOME Wayland MVP backend."
+            "On GNOME install libglib2.0-bin for the GNOME Shell backend."
         )

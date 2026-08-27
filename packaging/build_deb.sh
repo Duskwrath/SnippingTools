@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-VERSION="0.1.0"
+VERSION="0.1.1"
 REVISION="1"
 PACKAGE="opensnip"
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
@@ -34,7 +34,7 @@ Section: graphics
 Priority: optional
 Architecture: all
 Maintainer: OpenSnip Maintainers <maintainer@example.com>
-Depends: python3 (>= 3.12), python3-venv, python3-pip, gnome-screenshot
+Depends: python3 (>= 3.12), python3-venv, python3-pip, libglib2.0-bin
 Homepage: https://github.com/
 Description: Selection screenshot and annotation tool
  OpenSnip is a PySide6 screenshot utility for Ubuntu. It captures a selected
