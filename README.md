@@ -9,7 +9,7 @@ Download the latest Ubuntu `.deb` package from [GitHub Releases Page](https://gi
 Install it:
 
 ```bash
-sudo apt install ./opensnip_0.1.1-1_all.deb
+sudo apt install ./opensnip_0.1.2-1_all.deb
 ```
 
 Run OpenSnip:
@@ -31,14 +31,14 @@ sh packaging/build_deb.sh
 Install the generated package:
 
 ```bash
-sudo apt install ./dist/opensnip_0.1.1-1_all.deb
+sudo apt install ./dist/opensnip_0.1.2-1_all.deb
 ```
 
 If apt prints a `_apt` permission warning because the package is inside your home directory, install from `/tmp` instead:
 
 ```bash
-cp dist/opensnip_0.1.1-1_all.deb /tmp/
-sudo apt install /tmp/opensnip_0.1.1-1_all.deb
+cp dist/opensnip_0.1.2-1_all.deb /tmp/
+sudo apt install /tmp/opensnip_0.1.2-1_all.deb
 ```
 
 That warning is harmless when installation finishes with `Setting up opensnip`.
@@ -57,7 +57,7 @@ The package installs the app to `/opt/opensnip`, adds `/usr/bin/opensnip`, and c
 git clone https://github.com/Duskwrath/SnippingTools.git
 cd SnippingTools
 sudo apt update
-sudo apt install python3 python3-pip python3-venv libglib2.0-bin
+sudo apt install python3 python3-pip python3-venv gnome-screenshot
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -97,8 +97,8 @@ opensnip --new
 
 On an **X11** session OpenSnip uses Qt `QScreen.grabWindow(0)`, including a transparent in-app rectangular selection overlay. Multi-monitor screenshots are assembled into a virtual desktop image.
 
-On **GNOME Wayland**, direct screen reads are restricted by design. OpenSnip uses GNOME Shell's screenshot D-Bus API through `gdbus` (`libglib2.0-bin`). Its selection UI is owned by GNOME. Freeform capture falls back to rectangular selection in this MVP. The older `gnome-screenshot` command remains a fallback for legacy GNOME sessions where it still works.
+On **GNOME Wayland**, direct screen reads are restricted by design. OpenSnip uses the desktop-approved `gnome-screenshot` command (`-a` for area, `-f` for fullscreen, `-w` for the currently selected window). Its selection UI is owned by GNOME. Freeform capture falls back to rectangular selection in this MVP.
 
 `xdg-desktop-portal` has an isolated backend placeholder, but is intentionally not represented as working. Other Wayland desktops without a supported backend report a clear dependency/implementation error rather than claiming a capture succeeded.
 
-Required system package for the GNOME Wayland MVP on Ubuntu 24.04 and 26.04: `libglib2.0-bin`.
+Required system package for the GNOME Wayland MVP on Ubuntu 24.04 and 26.04: `gnome-screenshot`.

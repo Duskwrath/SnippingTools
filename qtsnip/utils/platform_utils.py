@@ -14,7 +14,3 @@ def current_desktop() -> str:
 
 def gnome_screenshot_available() -> bool:
     return shutil.which("gnome-screenshot") is not None
-
-
-def gdbus_available() -> bool:
-    return shutil.which("gdbus") is not None
